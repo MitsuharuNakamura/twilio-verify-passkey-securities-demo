@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAuthenticationResponse } from "@simplewebauthn/server";
-import type { AuthenticationResponseJSON } from "@simplewebauthn/server/script/deps";
+import type { AuthenticationResponseJSON } from "@simplewebauthn/types";
 import { createSession } from "@/lib/session";
 
 export const runtime = "nodejs";
