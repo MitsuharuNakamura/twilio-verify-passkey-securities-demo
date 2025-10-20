@@ -49,19 +49,65 @@
    - **User Verification**: `required`
 4. サービスSIDをコピー → `TWILIO_VERIFY_PASSKEY_SERVICE_SID`
 
-## 🚀 Vercelデプロイ
+## 📦 GitHubへの登録
 
-### Step 1: GitHubリポジトリの準備
+### Step 1: Gitリポジトリの初期化
 
 ```bash
-# リポジトリをGitHubにプッシュ
+cd twilio-securities
 git init
 git add .
-git commit -m "Initial commit"
+git commit -m "Initial commit: Twilio Verify Passkey demo with securities company UI"
+```
+
+### Step 2: GitHubリポジトリの作成
+
+#### 方法A: GitHub CLI（推奨）
+
+```bash
+# GitHub CLIの認証（初回のみ）
+gh auth login
+
+# リポジトリを作成してプッシュ
+gh repo create twilio-verify-passkey-securities-demo \
+  --public \
+  --source=. \
+  --description="Twilio Verify Passkey authentication demo with securities company UI - Next.js App Router, TypeScript, Tailwind CSS" \
+  --push
+```
+
+成功すると以下のように表示されます：
+```
+✓ Created repository your-username/twilio-verify-passkey-securities-demo on GitHub
+✓ Added remote https://github.com/your-username/twilio-verify-passkey-securities-demo.git
+✓ Pushed commits to https://github.com/your-username/twilio-verify-passkey-securities-demo.git
+```
+
+#### 方法B: GitHub Webインターフェース
+
+1. https://github.com/new にアクセス
+2. リポジトリ名を入力: `twilio-verify-passkey-securities-demo`
+3. Public/Privateを選択
+4. "Create repository" をクリック
+5. ローカルで以下を実行:
+
+```bash
+git remote add origin https://github.com/YOUR_USERNAME/twilio-verify-passkey-securities-demo.git
 git branch -M main
-git remote add origin https://github.com/your-username/twilio-passkey-demo.git
 git push -u origin main
 ```
+
+### Step 3: リポジトリの確認
+
+```bash
+# リモートリポジトリの確認
+git remote -v
+
+# ブラウザでGitHubリポジトリを開く
+gh repo view --web
+```
+
+## 🚀 Vercelデプロイ
 
 ### Step 2: Vercelプロジェクトの作成
 
@@ -95,6 +141,29 @@ vercel
 
 ### Step 3: 環境変数の設定
 
+#### 方法A: Vercel CLI（推奨）
+
+```bash
+cd twilio-securities
+
+# Twilio認証情報
+echo "ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" | vercel env add TWILIO_ACCOUNT_SID production
+echo "your_auth_token_here" | vercel env add TWILIO_AUTH_TOKEN production
+echo "VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" | vercel env add TWILIO_VERIFY_SERVICE_SID production
+
+# セッション秘密鍵（ランダムに生成）
+openssl rand -base64 32 | vercel env add SESSION_SECRET production
+
+# 公開環境変数（後でVercelドメインに合わせて更新）
+echo "https://twilio-securities.vercel.app" | vercel env add NEXT_PUBLIC_APP_BASE_URL production
+echo "twilio-securities.vercel.app" | vercel env add NEXT_PUBLIC_RP_ID production
+echo "NextGen Securities Passkey Demo" | vercel env add NEXT_PUBLIC_RP_NAME production
+```
+
+**重要**: 環境変数を設定する際、値の前後にスペースが入らないように注意してください。
+
+#### 方法B: Vercelダッシュボード
+
 Vercelダッシュボードで **Settings** > **Environment Variables** に移動し、以下を追加：
 
 #### Production環境
@@ -104,11 +173,15 @@ Vercelダッシュボードで **Settings** > **Environment Variables** に移�
 | `TWILIO_ACCOUNT_SID` | ACxxxxxxxx... | Production |
 | `TWILIO_AUTH_TOKEN` | your_auth_token | Production |
 | `TWILIO_VERIFY_SERVICE_SID` | VAxxxxxxxx... | Production |
-| `TWILIO_VERIFY_PASSKEY_SERVICE_SID` | VAxxxxxxxx... | Production |
-| `NEXT_PUBLIC_APP_BASE_URL` | https://your-app.vercel.app | Production |
-| `NEXT_PUBLIC_RP_ID` | your-app.vercel.app | Production |
-| `NEXT_PUBLIC_RP_NAME` | Booth Passkey Demo | Production |
+| `NEXT_PUBLIC_APP_BASE_URL` | https://your-project.vercel.app | Production |
+| `NEXT_PUBLIC_RP_ID` | your-project.vercel.app | Production |
+| `NEXT_PUBLIC_RP_NAME` | NextGen Securities Passkey Demo | Production |
 | `SESSION_SECRET` | (32文字以上のランダム文字列) | Production |
+
+**ヒント**: `SESSION_SECRET`はローカルで生成できます：
+```bash
+openssl rand -base64 32
+```
 
 #### Preview環境（任意）
 
@@ -123,15 +196,47 @@ vercel --prod
 
 デプロイが完了すると、URLが表示されます（例: `https://twilio-passkey-demo.vercel.app`）
 
-### Step 5: Passkey RP設定の更新
+### Step 5: Twilio Verify Passkey RP設定の更新
 
-デプロイ後、Twilio Console でPasskeyサービスの設定を更新：
+デプロイが完了したら、Vercelのドメインに合わせてTwilio Verify Serviceを更新します。
 
-1. **Verify** > **Passkeys** > サービスを選択
-2. **RP Settings** を編集:
-   - **RP ID**: `your-app.vercel.app`
-   - **Allowed Origins**: `https://your-app.vercel.app` を追加
-3. **Save** をクリック
+#### curlコマンドで更新（推奨）
+
+```bash
+# 実際の値に置き換えてください
+TWILIO_ACCOUNT_SID="ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+TWILIO_AUTH_TOKEN="your_auth_token"
+TWILIO_SERVICE_SID="VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+VERCEL_DOMAIN="twilio-securities.vercel.app"
+
+# Twilio Verify Serviceを更新
+curl -X POST "https://verify.twilio.com/v2/Services/${TWILIO_SERVICE_SID}" \
+  -u ${TWILIO_ACCOUNT_SID}:${TWILIO_AUTH_TOKEN} \
+  --data-urlencode "Passkeys.RelyingParty.Id=${VERCEL_DOMAIN}" \
+  --data-urlencode "Passkeys.RelyingParty.Origins=https://${VERCEL_DOMAIN}"
+```
+
+成功すると、以下のようなJSONレスポンスが返ります：
+```json
+{
+  "passkeys": {
+    "relying_party": {
+      "id": "twilio-securities.vercel.app",
+      "name": "Passkey Demo App",
+      "origins": ["https://twilio-securities.vercel.app"]
+    }
+  }
+}
+```
+
+#### Twilio Consoleで更新（代替方法）
+
+1. [Twilio Console](https://console.twilio.com) にログイン
+2. **Verify** > **Services** > サービスを選択
+3. **Passkeys Settings** セクションを編集:
+   - **RP ID**: `twilio-securities.vercel.app`
+   - **Allowed Origins**: `https://twilio-securities.vercel.app`
+4. **Save** をクリック
 
 ## ✅ デプロイ検証
 

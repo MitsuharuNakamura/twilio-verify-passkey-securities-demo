@@ -113,17 +113,121 @@ npm run dev
    - Origin: `http://localhost:3000` (開発) / `https://your-domain.com` (本番)
 5. サービスSIDを `.env.local` の `TWILIO_VERIFY_PASSKEY_SERVICE_SID` に設定
 
-## 📦 Vercelへのデプロイ
+## 📦 GitHubへの登録とVercelデプロイ
 
-詳細は [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) を参照してください。
+### GitHubリポジトリの作成
 
-### クイックデプロイ
+1. **Gitリポジトリの初期化**
+
+```bash
+cd twilio-securities
+git init
+git add .
+git commit -m "Initial commit: Twilio Verify Passkey demo with securities company UI"
+```
+
+2. **GitHub CLIでリポジトリ作成＆プッシュ**
+
+```bash
+# GitHub CLIの認証（初回のみ）
+gh auth login
+
+# リポジトリを作成してプッシュ
+gh repo create twilio-verify-passkey-securities-demo \
+  --public \
+  --source=. \
+  --description="Twilio Verify Passkey authentication demo with securities company UI - Next.js App Router, TypeScript, Tailwind CSS" \
+  --push
+```
+
+または、GitHub Webインターフェースで作成：
+1. https://github.com/new でリポジトリ作成
+2. ローカルで以下のコマンドを実行：
+
+```bash
+git remote add origin https://github.com/YOUR_USERNAME/twilio-verify-passkey-securities-demo.git
+git branch -M main
+git push -u origin main
+```
+
+### Vercelへのデプロイ
+
+1. **Vercel CLIのインストールとログイン**
 
 ```bash
 npm install -g vercel
 vercel login
+```
+
+2. **環境変数の設定**
+
+Vercelに本番環境の環境変数を設定します：
+
+```bash
+# Twilio認証情報
+vercel env add TWILIO_ACCOUNT_SID production
+# プロンプトで値を入力: ACxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+vercel env add TWILIO_AUTH_TOKEN production
+# プロンプトで値を入力: your_auth_token
+
+vercel env add TWILIO_VERIFY_SERVICE_SID production
+# プロンプトで値を入力: VAxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# セッション秘密鍵（ランダムに生成）
+echo $(openssl rand -base64 32) | vercel env add SESSION_SECRET production
+
+# 公開環境変数（Vercelドメインに合わせて設定）
+echo "https://your-project.vercel.app" | vercel env add NEXT_PUBLIC_APP_BASE_URL production
+echo "your-project.vercel.app" | vercel env add NEXT_PUBLIC_RP_ID production
+echo "NextGen Securities Passkey Demo" | vercel env add NEXT_PUBLIC_RP_NAME production
+```
+
+3. **Twilio Verify Serviceの更新**
+
+Vercelドメインに合わせてTwilio Verify Passkeyサービスを更新：
+
+```bash
+curl -X POST "https://verify.twilio.com/v2/Services/YOUR_SERVICE_SID" \
+  -u YOUR_ACCOUNT_SID:YOUR_AUTH_TOKEN \
+  --data-urlencode "Passkeys.RelyingParty.Id=your-project.vercel.app" \
+  --data-urlencode "Passkeys.RelyingParty.Origins=https://your-project.vercel.app"
+```
+
+4. **本番環境にデプロイ**
+
+```bash
 vercel --prod
 ```
+
+デプロイが完了すると、本番URLが表示されます：
+```
+✅  Production: https://your-project.vercel.app
+```
+
+5. **デプロイの確認**
+
+```bash
+# デプロイ一覧を表示
+vercel ls
+
+# 最新デプロイメントのログを確認
+vercel logs
+```
+
+### 継続的デプロイ（オプション）
+
+VercelとGitHubを連携すると、`main`ブランチへのプッシュで自動デプロイされます：
+
+1. [Vercel Dashboard](https://vercel.com/dashboard) にアクセス
+2. "Import Project" をクリック
+3. GitHubリポジトリを選択
+4. 環境変数を設定（上記と同じ）
+5. "Deploy" をクリック
+
+これで、GitHubにプッシュするたびに自動的にVercelにデプロイされます。
+
+詳細は [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) を参照してください。
 
 ## 🎬 ブース運用ガイド
 
