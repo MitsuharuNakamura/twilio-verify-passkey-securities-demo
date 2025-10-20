@@ -6,6 +6,7 @@ import { startAuthentication } from "@simplewebauthn/browser";
 import AuthModal from "@/components/AuthModal";
 import SecuritiesHeader from "@/components/SecuritiesHeader";
 import SecuritiesFooter from "@/components/SecuritiesFooter";
+import QRCodeAccess from "@/components/QRCodeAccess";
 
 export default function Home() {
   const router = useRouter();
@@ -283,6 +284,9 @@ export default function Home() {
                   </div>
                 </div>
               </div>
+
+              {/* QRコード */}
+              <QRCodeAccess />
 
               {/* お知らせ */}
               <div className="bg-white rounded-lg shadow-lg p-6">
