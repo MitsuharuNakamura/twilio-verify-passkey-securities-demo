@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
     if (!verification.verified || !verification.registrationInfo) {
       return NextResponse.json(
         {
-          error: `Passkey registration verification failed with status: ${verification.status}`,
+          error: "Passkey registration verification failed",
         },
         { status: 401 },
       );
