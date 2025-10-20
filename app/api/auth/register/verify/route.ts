@@ -16,9 +16,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
-    const origin =
-      process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000";
+    const rpID = (process.env.NEXT_PUBLIC_RP_ID || "localhost").trim();
+    const origin = (
+      process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000"
+    ).trim();
+
+    console.log("[VERIFY] RP ID:", rpID);
+    console.log("[VERIFY] Origin:", origin);
+    console.log("[VERIFY] Challenge:", challenge);
 
     // SimpleWebAuthnで登録レスポンスを検証
     const verification = await verifyRegistrationResponse({
@@ -28,7 +33,13 @@ export async function POST(request: NextRequest) {
       expectedRPID: rpID,
     });
 
+    console.log("[VERIFY] Verification result:", verification.verified);
+
     if (!verification.verified || !verification.registrationInfo) {
+      console.error("[VERIFY] Verification failed:", {
+        verified: verification.verified,
+        hasRegistrationInfo: !!verification.registrationInfo,
+      });
       return NextResponse.json(
         {
           error: "Passkey registration verification failed",

@@ -17,9 +17,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
-    const origin =
-      process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000";
+    const rpID = (process.env.NEXT_PUBLIC_RP_ID || "localhost").trim();
+    const origin = (
+      process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000"
+    ).trim();
 
     // Base64からBufferに変換
     const publicKeyBuffer = Buffer.from(credentialPublicKey, "base64");

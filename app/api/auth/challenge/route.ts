@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     console.log("[AUTH CHALLENGE] Generating challenge for userId:", userId);
     console.log("[AUTH CHALLENGE] credentialID:", credentialID);
 
-    const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
+    const rpID = (process.env.NEXT_PUBLIC_RP_ID || "localhost").trim();
 
     // allowCredentialsを空にして、ブラウザに自動的にパスキーを見つけさせる
     // これにより、Discoverable Credential (Resident Key) が使用される

@@ -14,10 +14,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const rpID = process.env.NEXT_PUBLIC_RP_ID || "localhost";
-    const rpName = process.env.NEXT_PUBLIC_RP_NAME || "Passkey Demo";
-    const origin =
-      process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000";
+    const rpID = (process.env.NEXT_PUBLIC_RP_ID || "localhost").trim();
+    const rpName = (process.env.NEXT_PUBLIC_RP_NAME || "Passkey Demo").trim();
+    const origin = (
+      process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000"
+    ).trim();
+
+    console.log("[CHALLENGE] RP ID:", rpID);
+    console.log("[CHALLENGE] RP Name:", rpName);
+    console.log("[CHALLENGE] Origin:", origin);
 
     // SimpleWebAuthnでWebAuthn登録オプションを生成
     // userIDは一意のバイナリ値である必要がある
